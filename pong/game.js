@@ -20,6 +20,8 @@ class Ball {
     }
 
     update() {
+        if (pause) return;
+
         this.x += this.velocity.x;
         this.y += this.velocity.y;
 
@@ -29,19 +31,26 @@ class Ball {
 }
 
 let ball;
+let pause = false;
 
 function init() {
     canvas.width = 600;
     canvas.height = 600;
 
     ball = new Ball(canvas.width / 2, canvas.height / 2, 5, 5);
+
+    document.addEventListener('keyup', (event) => {
+        if (event.code == 'Space') {
+            pause = ~pause;
+        }
+    })
 }
 
 function update() {
     requestAnimationFrame(update);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.rect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#000'; 
     ctx.fill();
 
     ball.update();
