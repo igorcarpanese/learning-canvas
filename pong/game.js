@@ -6,10 +6,7 @@ class Ball {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.velocity = {
-            x: 2,
-            y: 1
-        };
+        this.velocity = velocity;
     }
 
     handleCollision() {
@@ -58,8 +55,7 @@ function init() {
     canvas.width = 600;
     canvas.height = 600;
 
-    ball = new Ball(canvas.width / 2, canvas.height / 2, 5, 5);
-    // ball = new Ball(0, 0, 50, 5);
+    ball = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: 2, y: 1});
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
@@ -77,7 +73,6 @@ function update() {
 
     ball.update();
     ball.draw();
-
 }
 
 init();
