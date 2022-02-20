@@ -104,8 +104,25 @@ function init() {
     player = new Player(20, canvas.height / 2 - 50, 5, 100, 10);
 
     document.addEventListener('keyup', (event) => {
+        console.log(event.code)
         if (event.code == 'Space') {
             pause = ~pause;
+        }
+
+        if (event.code == 'NumpadAdd') {
+            if (ball.velocity.x > 0) ball.velocity.x++;
+            else ball.velocity.x--;
+
+            if (ball.velocity.y > 0) ball.velocity.y++;
+            else ball.velocity.y--;
+        }
+        
+        if (event.code == 'NumpadSubtract') {
+            if (ball.velocity.x > 0) ball.velocity.x--;
+            else ball.velocity.x++;
+            
+            if (ball.velocity.y > 0) ball.velocity.y--;
+            else ball.velocity.y++;
         }
     })
 
