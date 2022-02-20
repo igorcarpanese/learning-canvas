@@ -126,6 +126,14 @@ function update() {
     ctx.rect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#000'; 
     ctx.fill();
+    
+    if (pause) {
+        // TODO: Use a 8-bit custom font.
+        ctx.fillStyle = '#fff'; 
+        ctx.textAlign = "center";
+        ctx.font = "30px Inconsolata";
+        ctx.fillText("PAUSE", canvas.width / 2, canvas.height / 2);
+    }
 
     ball.update();
     ball.draw();
