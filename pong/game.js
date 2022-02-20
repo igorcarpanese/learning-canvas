@@ -9,10 +9,10 @@ class Ball {
         this.velocity = velocity;
     }
 
-    handleCollision() {
+    handleWallCollision() {
         if (this.x - this.radius < 0) {
-            this.x = this.radius;
-            this.velocity.x *= -1;
+            this.x = canvas.width / 2;
+            this.y = canvas.height / 2;
         }
 
         if (this.x + this.radius > canvas.width) {
@@ -31,6 +31,19 @@ class Ball {
         }
     }
 
+    handlePlayerCollision() {
+        // TODO: Handle case when the player collides with the ball going
+        // upwards and downwards.
+        const belowPlayerHead     = this.y + this.radius > player.y;
+        const abovePlayerFoot     = this.y - this.radius < player.y + player.h;
+        const inFrontOnPlayerBack = this.x + this.radius > player.x;
+        const behindPlayerFront   = this.x - this.radius < player.x + player.w;
+
+        if (belowPlayerHead && abovePlayerFoot && inFrontOnPlayerBack && behindPlayerFront) {
+            ball.velocity.x *= -1;
+        }
+    }
+
     draw() {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
@@ -44,11 +57,43 @@ class Ball {
         this.x += this.velocity.x;
         this.y += this.velocity.y;
 
-        this.handleCollision();
+        this.handleWallCollision();
+        this.handlePlayerCollision();
+    }
+}
+
+class Player {
+    constructor(x, y, w, h, velocity) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.velocity = velocity;
+    }
+
+    draw() {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.rect(this.x, this.y, this.w, this.h);
+        ctx.fill()
+    }
+
+    moveUp() {
+        if (pause) return;
+        
+        this.y = Math.max(0, this.y - this.velocity);
+    }
+    
+    moveDown() {
+        if (pause) return;
+
+        this.y = Math.min(canvas.height - this.h, this.y + this.velocity);
     }
 }
 
 let ball;
+let player;
 let pause = false;
 
 function init() {
@@ -56,10 +101,21 @@ function init() {
     canvas.height = 600;
 
     ball = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: 2, y: 1});
+    player = new Player(20, canvas.height / 2 - 50, 5, 100, 10);
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
             pause = ~pause;
+        }
+    })
+
+    document.addEventListener('keydown', (event) => {
+        if (event.code == 'ArrowUp') {
+            player.moveUp();
+        }
+
+        if (event.code == 'ArrowDown') {
+            player.moveDown();
         }
     })
 }
@@ -73,6 +129,8 @@ function update() {
 
     ball.update();
     ball.draw();
+
+    player.draw();
 }
 
 init();
