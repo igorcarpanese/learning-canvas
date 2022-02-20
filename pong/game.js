@@ -69,6 +69,8 @@ class Player {
         this.w = w;
         this.h = h;
         this.velocity = velocity;
+        this.movingDown = false;
+        this.movingUp = false;
     }
 
     draw() {
@@ -79,16 +81,14 @@ class Player {
         ctx.fill()
     }
 
-    moveUp() {
-        if (pause) return;
-        
-        this.y = Math.max(0, this.y - this.velocity);
-    }
-    
-    moveDown() {
+    update() {
         if (pause) return;
 
-        this.y = Math.min(canvas.height - this.h, this.y + this.velocity);
+        if (this.movingUp) {
+            this.y = Math.max(0, this.y - this.velocity);
+        } else if (this.movingDown) {
+            this.y = Math.min(canvas.height - this.h, this.y + this.velocity);
+        }
     }
 }
 
@@ -101,7 +101,7 @@ function init() {
     canvas.height = 600;
 
     ball = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: 2, y: 1});
-    player = new Player(20, canvas.height / 2 - 50, 5, 100, 10);
+    player = new Player(20, canvas.height / 2 - 50, 5, 100, 5);
 
     document.addEventListener('keyup', (event) => {
         console.log(event.code)
@@ -124,15 +124,23 @@ function init() {
             if (ball.velocity.y > 0) ball.velocity.y--;
             else ball.velocity.y++;
         }
+
+        if (event.code == 'ArrowUp') {
+            player.movingUp = false;
+        }
+        
+        if (event.code == 'ArrowDown') {
+            player.movingDown = false;
+        }
     })
 
     document.addEventListener('keydown', (event) => {
         if (event.code == 'ArrowUp') {
-            player.moveUp();
+            player.movingUp = true;
         }
-
+        
         if (event.code == 'ArrowDown') {
-            player.moveDown();
+            player.movingDown = true;
         }
     })
 }
@@ -155,6 +163,7 @@ function update() {
     ball.update();
     ball.draw();
 
+    player.update();
     player.draw();
 }
 
