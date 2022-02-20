@@ -12,6 +12,28 @@ class Ball {
         };
     }
 
+    handleCollision() {
+        if (this.x - this.radius < 0) {
+            this.x = this.radius;
+            this.velocity.x *= -1;
+        }
+
+        if (this.x + this.radius > canvas.width) {
+            this.velocity.x *= -1;
+            this.x = canvas.width - this.radius;
+        }
+
+        if (this.y - this.radius < 0) {
+            this.y = this.radius;
+            this.velocity.y *= -1;
+        }
+
+        if (this.y + this.radius > canvas.height) {  
+            this.y = canvas.height - this.radius;
+            this.velocity.y *= -1;
+        }
+    }
+
     draw() {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
@@ -25,8 +47,7 @@ class Ball {
         this.x += this.velocity.x;
         this.y += this.velocity.y;
 
-        if (this.x > canvas.width  || this.x < 0) this.velocity.x *= -1;
-        if (this.y > canvas.height || this.y < 0) this.velocity.y *= -1;
+        this.handleCollision();
     }
 }
 
@@ -38,6 +59,7 @@ function init() {
     canvas.height = 600;
 
     ball = new Ball(canvas.width / 2, canvas.height / 2, 5, 5);
+    // ball = new Ball(0, 0, 50, 5);
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
