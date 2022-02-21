@@ -4,11 +4,13 @@ const ctx = canvas.getContext('2d');
 class Ball {
     constructor(radius) {
         this.radius = radius;
+        this.resetting = false;
 
         this.reset()
     }
 
     reset() {
+        this.resetting = true;
         this.x = canvas.width / 2;
         this.y = canvas.height / 2;
         this.velocity = {
@@ -20,10 +22,14 @@ class Ball {
     handleWallCollision() {
         if (this.x - this.radius < 0) {
             this.reset();
+            player.reset();
+            enemy.reset();
         }
         
         if (this.x + this.radius > canvas.width) {
             this.reset();
+            player.reset();
+            enemy.reset();
         }
 
         if (this.y - this.radius < 0) {
@@ -58,8 +64,6 @@ class Ball {
         const inFrontOnEnemyBack = this.x + this.radius < enemy.x + enemy.w;
         const behindEnemyFront   = this.x + this.radius > enemy.x;
 
-        // console.log(inFrontOnEnemyBack, behindEnemyFront);
-
         if (belowEnemyHead && aboveEnemyFoot && inFrontOnEnemyBack && behindEnemyFront) {
             ball.velocity.x *= -1;
         }
@@ -75,6 +79,11 @@ class Ball {
     update() {
         if (pause) return;
 
+        if (this.resetting) {
+            if (player.resetting || enemy.resetting) return;
+            else this.resetting = false;
+        }
+
         this.x += this.velocity.x;
         this.y += this.velocity.y;
 
@@ -85,14 +94,23 @@ class Ball {
 }
 
 class Player {
-    constructor(x, y, w, h, velocity) {
-        this.x = x;
-        this.y = y;
+    constructor(w, h, velocity) {
         this.w = w;
         this.h = h;
         this.velocity = velocity;
         this.movingDown = false;
         this.movingUp = false;
+        this.resetting = false;
+
+        this.initialX = 20;
+        this.initialY = canvas.height / 2 - 50;
+
+        this.x = this.initialX;
+        this.y = this.initialY;
+    }
+
+    reset() {
+        this.resetting = true;
     }
 
     draw() {
@@ -105,6 +123,20 @@ class Player {
 
     update() {
         if (pause) return;
+
+        if (this.resetting) {
+            const velocity = Math.min(this.velocity, enemy.velocity);
+
+            if (this.y > this.initialY) {
+                this.y = Math.max(this.initialY, this.y - velocity);
+            } else if (this.y < this.initialY) {
+                this.y = Math.min(this.initialY, this.y + velocity);
+            } else {
+                this.resetting = false;
+            }
+
+            return;
+        }
 
         if (this.movingUp) {
             this.y = Math.max(0, this.y - this.velocity);
@@ -115,14 +147,23 @@ class Player {
 }
 
 class NaiveEnemy {
-    constructor(x, y, w, h, velocity) {
-        this.x = x;
-        this.y = y;
+    constructor(w, h, velocity) {
         this.w = w;
         this.h = h;
         this.velocity = velocity;
         this.movingDown = false;
         this.movingUp = false;
+        this.resetting = false;
+
+        this.initialX = canvas.width - 20 - 5;
+        this.initialY = canvas.height / 2 - 50;
+
+        this.x = this.initialX;
+        this.y = this.initialY;
+    }
+
+    reset() {
+        this.resetting = true;
     }
 
     draw() {
@@ -135,6 +176,20 @@ class NaiveEnemy {
 
     update() {
         if (pause) return;
+
+        if (this.resetting) {
+            const velocity = Math.min(this.velocity, player.velocity);
+
+            if (this.y > this.initialY) {
+                this.y = Math.max(this.initialY, this.y - velocity);
+            } else if (this.y < this.initialY) {
+                this.y = Math.min(this.initialY, this.y + velocity);
+            } else {
+                this.resetting = false;
+            }
+
+            return;
+        }
 
         if (ball.y < this.y + this.h / 2) {
             this.y = Math.max(
@@ -161,8 +216,8 @@ function init() {
     canvas.height = 600;
 
     ball   = new Ball(5);
-    player = new Player(20, canvas.height / 2 - 50, 5, 100, 5);
-    enemy  = new NaiveEnemy(canvas.width - 20 - 5, canvas.height / 2 - 50, 5, 100, 15);
+    player = new Player(5, 100, 5);
+    enemy  = new NaiveEnemy(5, 100, 15);
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
