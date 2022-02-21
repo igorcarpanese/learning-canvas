@@ -131,21 +131,17 @@ class NaiveEnemy {
         if (pause) return;
 
         if (ball.y < this.y + this.h / 2) {
-            this.y = Math.max(0, this.y - this.velocity);
-
-            // If the enemy's belly exceeds the center of the ball, the enemy
-            // should realign its position.
-            if (ball.y > this.y + this.h / 2) {
-                this.y = ball.y - this.h / 2;
-            }
+            this.y = Math.max(
+                0,
+                this.y - this.velocity,
+                ball.y - this.h / 2
+            );
         } else {
-            this.y = Math.min(canvas.height - this.h, this.y + this.velocity);
-
-            // If the enemy's belly exceeds the center of the ball, the enemy
-            // should realign its position.
-            if (ball.y < this.y + this.h / 2) {
-                this.y = ball.y - this.h / 2;
-            }
+            this.y = Math.min(
+                canvas.height - this.h,
+                this.y + this.velocity,
+                ball.y - this.h / 2
+            );
         }
     }
 }
@@ -158,7 +154,7 @@ function init() {
     canvas.width = 600;
     canvas.height = 600;
 
-    ball   = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: -2, y: 1});
+    ball   = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: -2, y: -1});
     player = new Player(20, canvas.height / 2 - 50, 5, 100, 5);
     enemy  = new NaiveEnemy(canvas.width - 20 - 5, canvas.height / 2 - 50, 5, 100, 15);
 
