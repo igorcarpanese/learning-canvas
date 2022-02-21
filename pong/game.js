@@ -2,22 +2,28 @@ const canvas = document.getElementById('screen')
 const ctx = canvas.getContext('2d');
 
 class Ball {
-    constructor(x, y, radius, velocity) {
-        this.x = x;
-        this.y = y;
+    constructor(radius) {
         this.radius = radius;
-        this.velocity = velocity;
+
+        this.reset()
+    }
+
+    reset() {
+        this.x = canvas.width / 2;
+        this.y = canvas.height / 2;
+        this.velocity = {
+            x: Math.ceil(Math.random() * (5 - (-5)) + (-5)),
+            y: Math.ceil(Math.random() * (5 - (-5)) + (-5))
+        };
     }
 
     handleWallCollision() {
         if (this.x - this.radius < 0) {
-            this.x = canvas.width / 2;
-            this.y = canvas.height / 2;
+            this.reset();
         }
-
+        
         if (this.x + this.radius > canvas.width) {
-            this.x = canvas.width / 2;
-            this.y = canvas.height / 2;
+            this.reset();
         }
 
         if (this.y - this.radius < 0) {
@@ -154,7 +160,7 @@ function init() {
     canvas.width = 600;
     canvas.height = 600;
 
-    ball   = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: -2, y: -1});
+    ball   = new Ball(5);
     player = new Player(20, canvas.height / 2 - 50, 5, 100, 5);
     enemy  = new NaiveEnemy(canvas.width - 20 - 5, canvas.height / 2 - 50, 5, 100, 15);
 
