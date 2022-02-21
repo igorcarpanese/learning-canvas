@@ -16,8 +16,8 @@ class Ball {
         }
 
         if (this.x + this.radius > canvas.width) {
-            this.velocity.x *= -1;
-            this.x = canvas.width - this.radius;
+            this.x = canvas.width / 2;
+            this.y = canvas.height / 2;
         }
 
         if (this.y - this.radius < 0) {
@@ -44,6 +44,21 @@ class Ball {
         }
     }
 
+    handleEnemyCollision() {
+        // TODO: Handle case when the player collides with the ball going
+        // upwards and downwards.
+        const belowEnemyHead     = this.y + this.radius > enemy.y;
+        const aboveEnemyFoot     = this.y - this.radius < enemy.y + enemy.h;
+        const inFrontOnEnemyBack = this.x + this.radius < enemy.x + enemy.w;
+        const behindEnemyFront   = this.x + this.radius > enemy.x;
+
+        // console.log(inFrontOnEnemyBack, behindEnemyFront);
+
+        if (belowEnemyHead && aboveEnemyFoot && inFrontOnEnemyBack && behindEnemyFront) {
+            ball.velocity.x *= -1;
+        }
+    }
+
     draw() {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
@@ -59,6 +74,7 @@ class Ball {
 
         this.handleWallCollision();
         this.handlePlayerCollision();
+        this.handleEnemyCollision();
     }
 }
 
@@ -92,19 +108,61 @@ class Player {
     }
 }
 
+class NaiveEnemy {
+    constructor(x, y, w, h, velocity) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.velocity = velocity;
+        this.movingDown = false;
+        this.movingUp = false;
+    }
+
+    draw() {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.rect(this.x, this.y, this.w, this.h);
+        ctx.fill()
+    }
+
+    update() {
+        if (pause) return;
+
+        if (ball.y < this.y + this.h / 2) {
+            this.y = Math.max(0, this.y - this.velocity);
+
+            // If the enemy's belly exceeds the center of the ball, the enemy
+            // should realign its position.
+            if (ball.y > this.y + this.h / 2) {
+                this.y = ball.y - this.h / 2;
+            }
+        } else {
+            this.y = Math.min(canvas.height - this.h, this.y + this.velocity);
+
+            // If the enemy's belly exceeds the center of the ball, the enemy
+            // should realign its position.
+            if (ball.y < this.y + this.h / 2) {
+                this.y = ball.y - this.h / 2;
+            }
+        }
+    }
+}
+
 let ball;
-let player;
+let player, enemy;
 let pause = false;
 
 function init() {
     canvas.width = 600;
     canvas.height = 600;
 
-    ball = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: 2, y: 1});
+    ball   = new Ball(canvas.width / 2, canvas.height / 2, 5, {x: -2, y: 1});
     player = new Player(20, canvas.height / 2 - 50, 5, 100, 5);
+    enemy  = new NaiveEnemy(canvas.width - 20 - 5, canvas.height / 2 - 50, 5, 100, 15);
 
     document.addEventListener('keyup', (event) => {
-        console.log(event.code)
         if (event.code == 'Space') {
             pause = ~pause;
         }
@@ -147,6 +205,7 @@ function init() {
 
 function update() {
     requestAnimationFrame(update);
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.rect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#000'; 
@@ -165,6 +224,9 @@ function update() {
 
     player.update();
     player.draw();
+
+    enemy.update();
+    enemy.draw();
 }
 
 init();
