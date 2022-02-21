@@ -36,7 +36,7 @@ class Ball {
         // upwards and downwards.
         const belowPlayerHead     = this.y + this.radius > player.y;
         const abovePlayerFoot     = this.y - this.radius < player.y + player.h;
-        const inFrontOnPlayerBack = this.x + this.radius > player.x;
+        const inFrontOnPlayerBack = this.x - this.radius > player.x;
         const behindPlayerFront   = this.x - this.radius < player.x + player.w;
 
         if (belowPlayerHead && abovePlayerFoot && inFrontOnPlayerBack && behindPlayerFront) {
