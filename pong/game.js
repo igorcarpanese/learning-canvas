@@ -43,12 +43,14 @@ class Ball {
             this.reset();
             player.reset();
             enemy.reset();
+            score.enemy++;
         }
         
         if (this.x + this.radius > canvas.width) {
             this.reset();
             player.reset();
             enemy.reset();
+            score.player++;
         }
 
         if (this.y - this.radius < 0) {
@@ -297,6 +299,10 @@ class WaitEnemy {
 let ball;
 let player, enemy;
 let paused = false;
+let score = {
+    player: 0,
+    enemy: 0
+};
 
 function init() {
     canvas.width = window.innerWidth;
@@ -317,6 +323,7 @@ function init() {
             player.reset();
             ball.reset();
             enemy = new NaiveEnemy(5, 100, 15);
+            score.player = score.enemy = 0;
         }
         
         // TODO: Improve transition of the enemy.
@@ -324,6 +331,7 @@ function init() {
             player.reset();
             ball.reset();
             enemy = new WaitEnemy(5, 100, 5);
+            score.player = score.enemy = 0;
         }
     })
 }
@@ -344,10 +352,16 @@ function update() {
         ctx.fillText("PAUSE", canvas.width / 2, canvas.height / 2);
     }
 
+    ctx.fillStyle = '#fff'; 
+    ctx.textAlign = "center";
+    ctx.font = "75px Inconsolata";
+    ctx.fillText(score.player, canvas.width / 10, canvas.height / 10);
+    ctx.fillText(score.enemy, canvas.width * 9 / 10, canvas.height / 10);
+
     ball.draw();
     player.draw();
     enemy.draw();
-    
+
     if (!paused) {
         ball.update();
         player.update();
