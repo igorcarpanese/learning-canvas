@@ -13,6 +13,7 @@ class Ball {
         this.resetting = true;
         this.x = canvas.width / 2;
         this.y = canvas.height / 2;
+
         this.velocity = {
             x: Math.ceil(Math.random() * (5 - (-5)) + (-5)),
             y: Math.ceil(Math.random() * (5 - (-5)) + (-5))
@@ -268,8 +269,8 @@ let player, enemy;
 let pause = false;
 
 function init() {
-    canvas.width = 600;
-    canvas.height = 600;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     ball   = new Ball(5);
     player = new Player(5, 100, 5);
