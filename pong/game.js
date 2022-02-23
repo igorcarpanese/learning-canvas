@@ -284,6 +284,20 @@ function init() {
             pause = ~pause;
         }
 
+        // TODO: Improve transition of the enemy.
+        if (event.code == 'Digit1' || event.code == 'Numpad1') {
+            player.reset();
+            ball.reset();
+            enemy = new NaiveEnemy(5, 100, 15);
+        }
+        
+        // TODO: Improve transition of the enemy.
+        if (event.code == 'Digit2' || event.code == 'Numpad2') {
+            player.reset();
+            ball.reset();
+            enemy = new WaitEnemy(5, 100, 5);
+        }
+
         if (event.code == 'NumpadAdd') {
             if (ball.velocity.x > 0) ball.velocity.x++;
             else ball.velocity.x--;
