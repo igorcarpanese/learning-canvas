@@ -7,6 +7,24 @@ class Ball {
         this.resetting = false;
 
         this.reset()
+
+        document.addEventListener('keyup', (event) => {
+            if (event.code == 'NumpadAdd') {
+                if (ball.velocity.x > 0) ball.velocity.x++;
+                else ball.velocity.x--;
+    
+                if (ball.velocity.y > 0) ball.velocity.y++;
+                else ball.velocity.y--;
+            }
+            
+            if (event.code == 'NumpadSubtract') {
+                if (ball.velocity.x > 0) ball.velocity.x--;
+                else ball.velocity.x++;
+                
+                if (ball.velocity.y > 0) ball.velocity.y--;
+                else ball.velocity.y++;
+            }
+        })
     }
 
     reset() {
@@ -108,6 +126,26 @@ class Player {
 
         this.x = this.initialX;
         this.y = this.initialY;
+
+        document.addEventListener('keyup', (event) => {
+            if (event.code == 'ArrowUp') {
+                player.movingUp = false;
+            }
+            
+            if (event.code == 'ArrowDown') {
+                player.movingDown = false;
+            }
+        })
+
+        document.addEventListener('keydown', (event) => {
+            if (event.code == 'ArrowUp') {
+                player.movingUp = true;
+            }
+            
+            if (event.code == 'ArrowDown') {
+                player.movingDown = true;
+            }
+        })
     }
 
     reset() {
@@ -294,40 +332,6 @@ function init() {
             player.reset();
             ball.reset();
             enemy = new WaitEnemy(5, 100, 5);
-        }
-
-        if (event.code == 'NumpadAdd') {
-            if (ball.velocity.x > 0) ball.velocity.x++;
-            else ball.velocity.x--;
-
-            if (ball.velocity.y > 0) ball.velocity.y++;
-            else ball.velocity.y--;
-        }
-        
-        if (event.code == 'NumpadSubtract') {
-            if (ball.velocity.x > 0) ball.velocity.x--;
-            else ball.velocity.x++;
-            
-            if (ball.velocity.y > 0) ball.velocity.y--;
-            else ball.velocity.y++;
-        }
-
-        if (event.code == 'ArrowUp') {
-            player.movingUp = false;
-        }
-        
-        if (event.code == 'ArrowDown') {
-            player.movingDown = false;
-        }
-    })
-
-    document.addEventListener('keydown', (event) => {
-        if (event.code == 'ArrowUp') {
-            player.movingUp = true;
-        }
-        
-        if (event.code == 'ArrowDown') {
-            player.movingDown = true;
         }
     })
 }
