@@ -116,7 +116,6 @@ class Player {
     draw() {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.rect(this.x, this.y, this.w, this.h);
         ctx.fill()
     }
@@ -169,7 +168,6 @@ class NaiveEnemy {
     draw() {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.rect(this.x, this.y, this.w, this.h);
         ctx.fill()
     }
@@ -230,7 +228,6 @@ class WaitEnemy {
     draw() {
         ctx.fillStyle = "#fff";
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.rect(this.x, this.y, this.w, this.h);
         ctx.fill()
     }
