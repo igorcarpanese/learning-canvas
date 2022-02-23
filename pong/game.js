@@ -207,6 +207,65 @@ class NaiveEnemy {
     }
 }
 
+class WaitEnemy {
+    constructor(w, h, velocity) {
+        this.w = w;
+        this.h = h;
+        this.velocity = velocity;
+        this.movingDown = false;
+        this.movingUp = false;
+        this.resetting = false;
+
+        this.initialX = canvas.width - 20 - 5;
+        this.initialY = canvas.height / 2 - 50;
+
+        this.x = this.initialX;
+        this.y = this.initialY;
+    }
+
+    reset() {
+        this.resetting = true;
+    }
+
+    draw() {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.rect(this.x, this.y, this.w, this.h);
+        ctx.fill()
+    }
+
+    update() {
+        if (pause) return;
+
+        const waiting = ball.velocity.x < 0;
+
+        if (waiting) {
+            if (this.y > this.initialY) {
+                this.y = Math.max(this.initialY, this.y - this.velocity);
+            } else if (this.y < this.initialY) {
+                this.y = Math.min(this.initialY, this.y + this.velocity);
+            } else {
+                this.resetting = false;
+            }
+        } else {
+            if (ball.y < this.y + this.h / 2) {
+                this.y = Math.max(
+                    0,
+                    this.y - this.velocity,
+                    ball.y - this.h / 2
+                );
+            } else {
+                this.y = Math.min(
+                    canvas.height - this.h,
+                    this.y + this.velocity,
+                    ball.y - this.h / 2
+                );
+            }
+        }
+    }
+}
+
 let ball;
 let player, enemy;
 let pause = false;
@@ -217,7 +276,8 @@ function init() {
 
     ball   = new Ball(5);
     player = new Player(5, 100, 5);
-    enemy  = new NaiveEnemy(5, 100, 15);
+    // enemy  = new NaiveEnemy(5, 100, 15);
+    enemy  = new WaitEnemy(5, 100, 5);
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
