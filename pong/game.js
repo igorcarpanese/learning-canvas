@@ -96,8 +96,6 @@ class Ball {
     }
 
     update() {
-        if (pause) return;
-
         if (this.resetting) {
             if (player.resetting || enemy.resetting) return;
             else this.resetting = false;
@@ -160,8 +158,6 @@ class Player {
     }
 
     update() {
-        if (pause) return;
-
         if (this.resetting) {
             const velocity = Math.min(this.velocity, enemy.velocity);
 
@@ -212,8 +208,6 @@ class NaiveEnemy {
     }
 
     update() {
-        if (pause) return;
-
         if (this.resetting) {
             const velocity = Math.min(this.velocity, player.velocity);
 
@@ -272,8 +266,6 @@ class WaitEnemy {
     }
 
     update() {
-        if (pause) return;
-
         const waiting = ball.velocity.x < 0;
 
         if (waiting) {
@@ -304,7 +296,7 @@ class WaitEnemy {
 
 let ball;
 let player, enemy;
-let pause = false;
+let paused = false;
 
 function init() {
     canvas.width = window.innerWidth;
@@ -317,7 +309,7 @@ function init() {
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
-            pause = ~pause;
+            paused = ~paused;
         }
 
         // TODO: Improve transition of the enemy.
@@ -344,7 +336,7 @@ function update() {
     ctx.fillStyle = '#000'; 
     ctx.fill();
     
-    if (pause) {
+    if (paused) {
         // TODO: Use a 8-bit custom font.
         ctx.fillStyle = '#fff'; 
         ctx.textAlign = "center";
@@ -352,14 +344,15 @@ function update() {
         ctx.fillText("PAUSE", canvas.width / 2, canvas.height / 2);
     }
 
-    ball.update();
     ball.draw();
-
-    player.update();
     player.draw();
-
-    enemy.update();
     enemy.draw();
+    
+    if (!paused) {
+        ball.update();
+        player.update();
+        enemy.update();
+    }
 }
 
 init();
