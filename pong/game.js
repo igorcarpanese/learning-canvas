@@ -138,7 +138,7 @@ class Player {
         this.resetting = false;
 
         this.initialX = 20;
-        this.initialY = canvas.height / 2 - 50;
+        this.initialY = canvas.height / 2 - this.h / 2;
 
         this.x = this.initialX;
         this.y = this.initialY;
@@ -207,8 +207,8 @@ class NaiveEnemy {
         this.movingUp = false;
         this.resetting = false;
 
-        this.initialX = canvas.width - 20 - 5;
-        this.initialY = canvas.height / 2 - 50;
+        this.initialX = canvas.width - this.w - player.initialX;
+        this.initialY = canvas.height / 2 - this.h / 2;
 
         this.x = this.initialX;
         this.y = this.initialY;
@@ -265,8 +265,8 @@ class WaitEnemy {
         this.movingUp = false;
         this.resetting = false;
 
-        this.initialX = canvas.width - 20 - 5;
-        this.initialY = canvas.height / 2 - 50;
+        this.initialX = canvas.width - this.w - player.initialX;
+        this.initialY = canvas.height / 2 - this.h / 2;
 
         this.x = this.initialX;
         this.y = this.initialY;
@@ -329,7 +329,6 @@ function init() {
 
     ball   = new Ball(7, {min: 8, max: 12});
     player = new Player(25, 125, 10);
-    // enemy  = new NaiveEnemy(5, 100, 15);
     enemy  = new WaitEnemy(25, 125, 10);
 
     document.addEventListener('keyup', (event) => {
@@ -349,7 +348,7 @@ function init() {
         if (event.code == 'Digit2' || event.code == 'Numpad2') {
             player.reset();
             ball.reset();
-            enemy = new WaitEnemy(5, 100, 5);
+            enemy = new WaitEnemy(25, 125, 5);
             score.player = score.enemy = 0;
         }
     })
