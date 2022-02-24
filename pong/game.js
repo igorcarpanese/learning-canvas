@@ -6,6 +6,7 @@ class Ball {
         this.radius = radius;
         this.initialVelocity = initialVelocity;
         this.resetting = false;
+        this.n_hits = 0;
 
         this.reset()
 
@@ -32,6 +33,7 @@ class Ball {
         this.resetting = true;
         this.x = canvas.width / 2;
         this.y = canvas.height / 2;
+        this.n_hits = 0;
 
         function randomVelocity(initialVelocity) {
             const min = initialVelocity.min;
@@ -90,9 +92,10 @@ class Ball {
 
         if (belowPlayerHead && abovePlayerFoot && inFrontOnPlayerBack && behindPlayerFront) {
             ball.velocity.x *= -1;
+            this.n_hits++;
         }
     }
-
+    
     handleEnemyCollision() {
         // TODO: Handle case when the player collides with the ball going
         // upwards and downwards.
@@ -100,9 +103,10 @@ class Ball {
         const aboveEnemyFoot     = this.y - this.radius < enemy.y + enemy.h;
         const inFrontOnEnemyBack = this.x + this.radius < enemy.x + enemy.w;
         const behindEnemyFront   = this.x + this.radius > enemy.x;
-
+        
         if (belowEnemyHead && aboveEnemyFoot && inFrontOnEnemyBack && behindEnemyFront) {
             ball.velocity.x *= -1;
+            this.n_hits++;
         }
     }
 
@@ -125,6 +129,16 @@ class Ball {
         this.handleWallCollision();
         this.handlePlayerCollision();
         this.handleEnemyCollision();
+
+        if (this.n_hits == 4) {
+            if (ball.velocity.x > 0) ball.velocity.x++;
+            else ball.velocity.x--;
+
+            if (ball.velocity.y > 0) ball.velocity.y++;
+            else ball.velocity.y--;
+
+            this.n_hits = 0;
+        }
     }
 }
 
