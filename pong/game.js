@@ -324,10 +324,10 @@ function init() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    ball   = new Ball(5, {min: 4, max: 5});
-    player = new Player(5, 100, 5);
+    ball   = new Ball(5, {min: 8, max: 12});
+    player = new Player(25, 125, 10);
     // enemy  = new NaiveEnemy(5, 100, 15);
-    enemy  = new WaitEnemy(5, 100, 5);
+    enemy  = new WaitEnemy(25, 125, 10);
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
@@ -338,7 +338,7 @@ function init() {
         if (event.code == 'Digit1' || event.code == 'Numpad1') {
             player.reset();
             ball.reset();
-            enemy = new NaiveEnemy(5, 100, 15);
+            enemy = new NaiveEnemy(25, 125, 15);
             score.player = score.enemy = 0;
         }
         
