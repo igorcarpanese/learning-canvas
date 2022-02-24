@@ -284,7 +284,7 @@ class WaitEnemy {
     }
 
     update() {
-        const waiting = ball.velocity.x < 0;
+        const waiting = ball.velocity.x < 0 || ball.resetting;
 
         if (waiting) {
             if (this.y > this.initialY) {
