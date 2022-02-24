@@ -324,7 +324,10 @@ function init() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    ball   = new Ball(5, {min: 8, max: 12});
+    const font = new FontFace('Pixeboy', 'url(assets/fonts/pixeboy/Pixeboy.ttf)');
+    document.fonts.add(font);    
+
+    ball   = new Ball(7, {min: 8, max: 12});
     player = new Player(25, 125, 10);
     // enemy  = new NaiveEnemy(5, 100, 15);
     enemy  = new WaitEnemy(25, 125, 10);
@@ -364,19 +367,28 @@ function update() {
         // TODO: Use a 8-bit custom font.
         ctx.fillStyle = '#fff'; 
         ctx.textAlign = "center";
-        ctx.font = "30px Inconsolata";
+        ctx.textBaseline = "hanging";
+        ctx.font = "60px Pixeboy";
         ctx.fillText("PAUSE", canvas.width / 2, canvas.height / 2);
     }
-
-    ctx.fillStyle = '#fff'; 
-    ctx.textAlign = "center";
-    ctx.font = "75px Inconsolata";
-    ctx.fillText(score.player, canvas.width / 10, canvas.height / 10);
-    ctx.fillText(score.enemy, canvas.width * 9 / 10, canvas.height / 10);
 
     ball.draw();
     player.draw();
     enemy.draw();
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#fff';
+    ctx.setLineDash([15, 20]);
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff'; 
+    ctx.textAlign = "center";
+    ctx.textBaseline = "hanging";
+    ctx.font = "175px Pixeboy";
+    ctx.fillText(score.player, canvas.width * 1 / 4, canvas.height / 100);
+    ctx.fillText(score.enemy, canvas.width * 3 / 4, canvas.height  / 100);
 
     if (!paused) {
         ball.update();
