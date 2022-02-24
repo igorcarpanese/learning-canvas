@@ -12,19 +12,19 @@ class Ball {
 
         document.addEventListener('keyup', (event) => {
             if (event.code == 'NumpadAdd') {
-                if (ball.velocity.x > 0) ball.velocity.x++;
-                else ball.velocity.x--;
+                if (this.velocity.x > 0) this.velocity.x++;
+                else this.velocity.x--;
     
-                if (ball.velocity.y > 0) ball.velocity.y++;
-                else ball.velocity.y--;
+                if (this.velocity.y > 0) this.velocity.y++;
+                else this.velocity.y--;
             }
 
             if (event.code == 'NumpadSubtract') {
-                if (ball.velocity.x > 0) ball.velocity.x--;
-                else ball.velocity.x++;
+                if (this.velocity.x > 0) this.velocity.x--;
+                else this.velocity.x++;
                 
-                if (ball.velocity.y > 0) ball.velocity.y--;
-                else ball.velocity.y++;
+                if (this.velocity.y > 0) this.velocity.y--;
+                else this.velocity.y++;
             }
         })
     }
@@ -91,7 +91,7 @@ class Ball {
         const behindPlayerFront   = this.x - this.radius < player.x + player.w;
 
         if (belowPlayerHead && abovePlayerFoot && inFrontOnPlayerBack && behindPlayerFront) {
-            ball.velocity.x *= -1;
+            this.velocity.x *= -1;
             this.n_hits++;
         }
     }
@@ -105,7 +105,7 @@ class Ball {
         const behindEnemyFront   = this.x + this.radius > enemy.x;
         
         if (belowEnemyHead && aboveEnemyFoot && inFrontOnEnemyBack && behindEnemyFront) {
-            ball.velocity.x *= -1;
+            this.velocity.x *= -1;
             this.n_hits++;
         }
     }
@@ -131,11 +131,11 @@ class Ball {
         this.handleEnemyCollision();
 
         if (this.n_hits == 4) {
-            if (ball.velocity.x > 0) ball.velocity.x++;
-            else ball.velocity.x--;
+            if (this.velocity.x > 0) this.velocity.x++;
+            else this.velocity.x--;
 
-            if (ball.velocity.y > 0) ball.velocity.y++;
-            else ball.velocity.y--;
+            if (this.velocity.y > 0) this.velocity.y++;
+            else this.velocity.y--;
 
             this.n_hits = 0;
         }
