@@ -2,8 +2,9 @@ const canvas = document.getElementById('screen')
 const ctx = canvas.getContext('2d');
 
 class Ball {
-    constructor(radius) {
+    constructor(radius, initialVelocity) {
         this.radius = radius;
+        this.initialVelocity = initialVelocity;
         this.resetting = false;
 
         this.reset()
@@ -16,7 +17,7 @@ class Ball {
                 if (ball.velocity.y > 0) ball.velocity.y++;
                 else ball.velocity.y--;
             }
-            
+
             if (event.code == 'NumpadSubtract') {
                 if (ball.velocity.x > 0) ball.velocity.x--;
                 else ball.velocity.x++;
@@ -32,9 +33,24 @@ class Ball {
         this.x = canvas.width / 2;
         this.y = canvas.height / 2;
 
+        function randomVelocity(initialVelocity) {
+            const min = initialVelocity.min;
+            const max = initialVelocity.max;
+
+            const directions = [
+                Math.ceil(Math.random() * ( max - min) + ( min)),
+                Math.ceil(Math.random() * (-max + min) + (-min))
+            ]
+
+            const randomIndex = Math.round(Math.random());
+
+            return directions[randomIndex];
+
+        }
+
         this.velocity = {
-            x: Math.ceil(Math.random() * (5 - (-5)) + (-5)),
-            y: Math.ceil(Math.random() * (5 - (-5)) + (-5))
+            x: randomVelocity(this.initialVelocity),
+            y: randomVelocity(this.initialVelocity)
         };
     }
 
@@ -308,7 +324,7 @@ function init() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    ball   = new Ball(5);
+    ball   = new Ball(5, {min: 4, max: 5});
     player = new Player(5, 100, 5);
     // enemy  = new NaiveEnemy(5, 100, 15);
     enemy  = new WaitEnemy(5, 100, 5);
