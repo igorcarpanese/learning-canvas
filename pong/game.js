@@ -217,8 +217,6 @@ class NaiveEnemy {
         this.w = w;
         this.h = h;
         this.velocity = velocity;
-        this.movingDown = false;
-        this.movingUp = false;
         this.resetting = false;
 
         this.initialX = canvas.width - this.w - player.initialX;
@@ -275,8 +273,6 @@ class WaitEnemy {
         this.w = w;
         this.h = h;
         this.velocity = velocity;
-        this.movingDown = false;
-        this.movingUp = false;
         this.resetting = false;
 
         this.initialX = canvas.width - this.w - player.initialX;
@@ -331,8 +327,6 @@ class PredictEnemy {
         this.w = w;
         this.h = h;
         this.velocity = velocity;
-        this.movingDown = false;
-        this.movingUp = false;
         this.resetting = false;
         this.relax = true;
 
