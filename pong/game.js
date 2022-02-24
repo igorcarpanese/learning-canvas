@@ -171,7 +171,7 @@ class Player {
             if (event.code == 'ArrowUp') {
                 player.movingUp = true;
             }
-            
+
             if (event.code == 'ArrowDown') {
                 player.movingDown = true;
             }
@@ -326,6 +326,84 @@ class WaitEnemy {
     }
 }
 
+class PredictEnemy {
+    constructor(w, h, velocity) {
+        this.w = w;
+        this.h = h;
+        this.velocity = velocity;
+        this.movingDown = false;
+        this.movingUp = false;
+        this.resetting = false;
+        this.relax = true;
+
+        this.initialX = canvas.width - this.w - player.initialX;
+        this.initialY = canvas.height / 2 - this.h / 2;
+
+        this.targetY = this.initialY; 
+
+        this.x = this.initialX;
+        this.y = this.initialY;
+    }
+
+    reset() {
+        this.resetting = true;
+        this.relax = true;
+    }
+
+    draw() {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.rect(this.x, this.y, this.w, this.h);
+        ctx.fill()
+    }
+
+    updateTargetY() {
+        const simulationBall = new Ball(ball.radius, {min: 0, max: 0});
+        simulationBall.velocity = {...ball.velocity};
+        simulationBall.x = ball.x;
+        simulationBall.y = ball.y;
+
+        while (simulationBall.x + simulationBall.radius < this.x) {
+            simulationBall.update();
+        }
+
+        this.targetY = Math.min(
+            Math.max(0, simulationBall.y - this.h / 2),
+            canvas.height - this.h
+        );
+    }
+
+    update() {
+        const nextRelax = ball.velocity.x < 0 || ball.resetting;
+        
+        if (this.relax && nextRelax) {
+            if (this.y > this.initialY) {
+                this.y = Math.max(this.initialY, this.y - this.velocity);
+            } else if (this.y < this.initialY) {
+                this.y = Math.min(this.initialY, this.y + this.velocity);
+            } else {
+                this.resetting = false;
+            }
+
+            return;
+        }
+
+        if (this.relax && !nextRelax) {
+            this.updateTargetY();
+        }
+
+        if (this.y > this.targetY) {
+            this.y = Math.max(this.targetY, this.y - this.velocity);
+        } else if (this.y < this.targetY) {
+            this.y = Math.min(this.targetY, this.y + this.velocity);
+        } else {
+            this.resetting = false;
+        }
+
+        this.relax = nextRelax;
+    }
+}
+
 let ball;
 let player, enemy;
 let paused = false;
@@ -343,7 +421,7 @@ function init() {
 
     ball   = new Ball(7, {min: 8, max: 12});
     player = new Player(25, 125, 10);
-    enemy  = new WaitEnemy(25, 125, 10);
+    enemy  = new PredictEnemy(25, 125, 10);
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
@@ -365,6 +443,14 @@ function init() {
             enemy = new WaitEnemy(25, 125, 5);
             score.player = score.enemy = 0;
         }
+        
+        // TODO: Improve transition of the enemy.
+        if (event.code == 'Digit3' || event.code == 'Numpad3') {
+            player.reset();
+            ball.reset();
+            enemy = new PredictEnemy(25, 125, 5);
+            score.player = score.enemy = 0;
+        }
     })
 }
 
@@ -375,7 +461,7 @@ function update() {
     ctx.rect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#000'; 
     ctx.fill();
-    
+
     if (paused) {
         // TODO: Use a 8-bit custom font.
         ctx.fillStyle = '#fff'; 
