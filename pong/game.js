@@ -426,7 +426,7 @@ function init() {
         if (event.code == 'Digit1' || event.code == 'Numpad1') {
             player.reset();
             ball.reset();
-            enemy = new NaiveEnemy(25, 125, 15);
+            enemy = new NaiveEnemy(25, 125, 10);
             score.player = score.enemy = 0;
         }
         
@@ -434,7 +434,7 @@ function init() {
         if (event.code == 'Digit2' || event.code == 'Numpad2') {
             player.reset();
             ball.reset();
-            enemy = new WaitEnemy(25, 125, 5);
+            enemy = new WaitEnemy(25, 125, 10);
             score.player = score.enemy = 0;
         }
         
@@ -442,7 +442,7 @@ function init() {
         if (event.code == 'Digit3' || event.code == 'Numpad3') {
             player.reset();
             ball.reset();
-            enemy = new PredictEnemy(25, 125, 5);
+            enemy = new PredictEnemy(25, 125, 10);
             score.player = score.enemy = 0;
         }
     })
