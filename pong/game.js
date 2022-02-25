@@ -2,13 +2,17 @@ const canvas = document.getElementById('screen')
 const ctx = canvas.getContext('2d');
 
 class Ball {
-    constructor(radius, initialVelocity) {
+    constructor(id, x, y, radius, initialVelocity) {
+        this.id = id;
         this.radius = radius;
         this.initialVelocity = initialVelocity;
         this.resetting = false;
         this.n_hits = 0;
 
         this.reset()
+
+        this.x = x;
+        this.y = y;
 
         document.addEventListener('keyup', (event) => {
             if (event.code == 'NumpadAdd') {
@@ -59,16 +63,24 @@ class Ball {
     handleWallCollision() {
         if (this.x - this.radius < 0) {
             this.reset();
-            player.reset();
-            enemy.reset();
+
             score.enemy++;
+
+            if (balls.length == 1) {
+                player.reset();
+                enemy.reset();
+            }
         }
         
         if (this.x + this.radius > canvas.width) {
             this.reset();
-            player.reset();
-            enemy.reset();
+
             score.player++;
+            
+            if (balls.length == 1) {
+                player.reset();
+                enemy.reset();
+            }
         }
 
         if (this.y - this.radius < 0) {
@@ -237,6 +249,12 @@ class NaiveEnemy {
         ctx.fill()
     }
 
+    getNextTargetBall() {
+        return balls.reduce((prev, current) => {
+            return (current.x > prev.x) ? current : prev;
+        });
+    }
+    
     update() {
         if (this.resetting) {
             const velocity = Math.min(this.velocity, player.velocity);
@@ -252,17 +270,19 @@ class NaiveEnemy {
             return;
         }
 
-        if (ball.y < this.y + this.h / 2) {
+        const nextTargetBall = this.getNextTargetBall();
+
+        if (nextTargetBall.y < this.y + this.h / 2) {
             this.y = Math.max(
                 0,
                 this.y - this.velocity,
-                ball.y - this.h / 2
+                nextTargetBall.y - this.h / 2
             );
         } else {
             this.y = Math.min(
                 canvas.height - this.h,
                 this.y + this.velocity,
-                ball.y - this.h / 2
+                nextTargetBall.y - this.h / 2
             );
         }
     }
@@ -293,10 +313,25 @@ class WaitEnemy {
         ctx.fill()
     }
 
-    update() {
-        const waiting = ball.velocity.x < 0 || ball.resetting;
+    getNextTargetBall() {
+        const attackingBalls = balls.filter((ball) => ball.velocity.x > 0);
+ 
+        if (attackingBalls.length == 0) {
+            return null
+        };
 
-        if (waiting) {
+        return attackingBalls.reduce((prev, current) => {
+            return (current.x > prev.x) ? current : prev;
+        });
+    }
+    
+    update() {
+        const nextTargetBall = this.getNextTargetBall();
+
+        const waiting = !nextTargetBall || this.resetting;
+        const waitBallReset = nextTargetBall && nextTargetBall.resetting;
+
+        if (waiting || waitBallReset) {
             if (this.y > this.initialY) {
                 this.y = Math.max(this.initialY, this.y - this.velocity);
             } else if (this.y < this.initialY) {
@@ -305,20 +340,22 @@ class WaitEnemy {
                 this.resetting = false;
             }
         } else {
-            if (ball.y < this.y + this.h / 2) {
+            if (nextTargetBall.y < this.y + this.h / 2) {
                 this.y = Math.max(
                     0,
                     this.y - this.velocity,
-                    ball.y - this.h / 2
+                    nextTargetBall.y - this.h / 2
                 );
             } else {
                 this.y = Math.min(
                     canvas.height - this.h,
                     this.y + this.velocity,
-                    ball.y - this.h / 2
+                    nextTargetBall.y - this.h / 2
                 );
             }
         }
+
+        this.targetBall = nextTargetBall;
     }
 }
 
@@ -328,20 +365,34 @@ class PredictEnemy {
         this.h = h;
         this.velocity = velocity;
         this.resetting = false;
-        this.relax = true;
 
         this.initialX = canvas.width - this.w - player.initialX;
         this.initialY = canvas.height / 2 - this.h / 2;
 
-        this.targetY = this.initialY; 
-
         this.x = this.initialX;
         this.y = this.initialY;
+
+        this.targetBall = null;
+        this.targetY = this.initialY;
+
+        this.updateTargetY(); 
+    }
+
+    getNextTargetBall() {
+        const attackingBalls = balls.filter((ball) => ball.velocity.x > 0);
+ 
+        if (attackingBalls.length == 0) {
+            return null
+        };
+
+        return attackingBalls.reduce((prev, current) => {
+            return (current.x > prev.x) ? current : prev;
+        });
     }
 
     reset() {
         this.resetting = true;
-        this.relax = true;
+        this.updateTargetY();
     }
 
     draw() {
@@ -352,10 +403,28 @@ class PredictEnemy {
     }
 
     updateTargetY() {
-        const simulationBall = new Ball(ball.radius, {min: 0, max: 0});
-        simulationBall.velocity = {...ball.velocity};
-        simulationBall.x = ball.x;
-        simulationBall.y = ball.y;
+        // TODO: Maybe I should get this.targetBall instead of nextTargetBall.
+        const nextTargetBall = this.getNextTargetBall();
+
+        // Returning to initial position.
+        const relax = !nextTargetBall || this.resetting;
+        const waitBallReset = nextTargetBall && nextTargetBall.resetting;
+
+        if (relax || waitBallReset) {
+            this.targetY = this.initialY;
+            return;
+        }
+
+        // Find target ball final position.
+        const simulationBall = new Ball(
+            ballId++,
+            nextTargetBall.x,
+            nextTargetBall.y,
+            nextTargetBall.radius,
+            {min: 0, max: 0}
+        );
+
+        simulationBall.velocity = {...nextTargetBall.velocity};
 
         while (simulationBall.x + simulationBall.radius < this.x) {
             simulationBall.update();
@@ -367,44 +436,63 @@ class PredictEnemy {
         );
     }
 
-    update() {
-        const nextRelax = ball.velocity.x < 0 || ball.resetting;
-        
-        if (this.relax && nextRelax) {
-            if (this.y > this.initialY) {
-                this.y = Math.max(this.initialY, this.y - this.velocity);
-            } else if (this.y < this.initialY) {
-                this.y = Math.min(this.initialY, this.y + this.velocity);
-            } else {
-                this.resetting = false;
-            }
-
-            return;
-        }
-
-        if (this.relax && !nextRelax) {
-            this.updateTargetY();
-        }
-
+    move() {
         if (this.y > this.targetY) {
             this.y = Math.max(this.targetY, this.y - this.velocity);
         } else if (this.y < this.targetY) {
             this.y = Math.min(this.targetY, this.y + this.velocity);
-        } else {
+        }
+        
+        if (this.targetY == this.initialY && this.targetY == this.y) {
             this.resetting = false;
         }
+    }
 
-        this.relax = nextRelax;
+    update() {
+        const nextTargetBall = this.getNextTargetBall();
+
+        // Imedially after hitting the last attacking ball.
+        if (this.targetBall && !nextTargetBall) {
+            this.updateTargetY();
+        }
+
+        // Returning to initial position.
+        const relax = !nextTargetBall || this.resetting;
+        const waitBallReset = nextTargetBall && nextTargetBall.resetting;
+
+        if (relax || waitBallReset) {
+            this.move();
+        }
+
+        // Move to the final position of the attacking ball.
+        const backToGame = nextTargetBall && !this.ball;
+        const targetBallChanged = this.targetBall && nextTargetBall && this.targetBall.id != nextTargetBall.id;
+
+        if (backToGame || targetBallChanged) {
+            this.updateTargetY();
+        }
+
+        this.move();
+
+        // Update targetBall.
+        this.targetBall = nextTargetBall;
     }
 }
 
-let ball;
+let balls = [];
+let ballId = 0;
 let player, enemy;
 let paused = false;
 let score = {
     player: 0,
     enemy: 0
 };
+
+function reset_balls() {
+    const x = canvas.width / 2;
+    const y = canvas.height / 2;
+    balls = [new Ball(ballId++, x, y, 7, {min: 10, max: 15})];
+}
 
 function init() {
     canvas.width = window.innerWidth;
@@ -413,9 +501,9 @@ function init() {
     const font = new FontFace('Pixeboy', 'url(assets/fonts/pixeboy/Pixeboy.ttf)');
     document.fonts.add(font);    
 
-    ball   = new Ball(7, {min: 8, max: 12});
     player = new Player(25, 125, 10);
     enemy  = new PredictEnemy(25, 125, 10);
+    reset_balls();
 
     document.addEventListener('keyup', (event) => {
         if (event.code == 'Space') {
@@ -424,27 +512,33 @@ function init() {
 
         // TODO: Improve transition of the enemy.
         if (event.code == 'Digit1' || event.code == 'Numpad1') {
+            reset_balls();
             player.reset();
-            ball.reset();
             enemy = new NaiveEnemy(25, 125, 10);
             score.player = score.enemy = 0;
         }
         
         // TODO: Improve transition of the enemy.
         if (event.code == 'Digit2' || event.code == 'Numpad2') {
+            reset_balls();
             player.reset();
-            ball.reset();
             enemy = new WaitEnemy(25, 125, 10);
             score.player = score.enemy = 0;
         }
         
         // TODO: Improve transition of the enemy.
         if (event.code == 'Digit3' || event.code == 'Numpad3') {
+            reset_balls();
             player.reset();
-            ball.reset();
             enemy = new PredictEnemy(25, 125, 10);
             score.player = score.enemy = 0;
         }
+    })
+
+    document.addEventListener('click', (event) => {
+        const x = event.clientX;
+        const y = event.clientY;
+        balls.push(new Ball(ballId++, x, y, 7, {min: 10, max: 15}));
     })
 }
 
@@ -465,7 +559,7 @@ function update() {
         ctx.fillText("PAUSE", canvas.width / 2, canvas.height / 2);
     }
 
-    ball.draw();
+    balls.forEach((ball) => ball.draw());
     player.draw();
     enemy.draw();
 
@@ -484,7 +578,7 @@ function update() {
     ctx.fillText(score.enemy, canvas.width * 3 / 4, canvas.height  / 100);
 
     if (!paused) {
-        ball.update();
+        balls.forEach((ball) => ball.update());
         player.update();
         enemy.update();
     }
