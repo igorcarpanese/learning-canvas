@@ -29,6 +29,20 @@ const boxSize = {
     h: 58,
     w: 58
 };
+const transition = {
+    active: false,
+    type: 1,
+    shrinking: true,
+    freeze: false,
+    index: 0
+}
+
+function resetTransition() {
+    transition.active = false;
+    transition.type = 1;
+    transition.shrinking = true;
+    transition.index = 0;
+}
 
 function drawWords() {
     let x0 = canvas.width / 2 - (grid[0].length / 2 * boxSize.w) - boxSize.w / 2;
@@ -58,14 +72,33 @@ function drawWordsBox() {
             let y = y0 + (i+1) * boxSize.h;
 
             if (i < round) {
-                ctx.beginPath();
-                ctx.fillStyle = feedback[i][j];
-                ctx.rect(x, y, boxSize.w, boxSize.h);
-                ctx.fill();
+                if (transition.type == 0 || !transition.active || i < round - 1) {
+                    ctx.beginPath();
+                    ctx.fillStyle = feedback[i][j];
+                    ctx.rect(x, y, boxSize.w, boxSize.h);
+                    ctx.fill();
 
-                ctx.beginPath();
-                ctx.strokeStyle = '#fff';
-                ctx.strokeRect(x, y, boxSize.w, boxSize.h);
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#fff';
+                    ctx.strokeRect(x, y, boxSize.w, boxSize.h);
+                } else if (transition.type == 1) {
+                    if (j < transition.index) {
+                        ctx.beginPath();
+                        ctx.fillStyle = feedback[i][j];
+                        ctx.rect(x, y, boxSize.w, boxSize.h);
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#fff';
+                        ctx.strokeRect(x, y, boxSize.w, boxSize.h);
+                    } else {
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#fff';
+                        ctx.strokeRect(x, y, boxSize.w, boxSize.h);
+                    }
+                } else if (transition.type == 2) {
+                    
+                }
             } else {
                 ctx.beginPath();
                 ctx.strokeStyle = '#fff';
@@ -135,12 +168,35 @@ function getFeedback() {
     }
 }
 
+function transition1() {
+    // Update transition parameters.
+    transition.freeze = true;
+    
+    // Draw before freeze main game loop.
+    transition.index++;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000'; 
+    ctx.fill();
+
+    drawWordsBox();
+    drawWords();
+    drawAuxLines();
+
+    // Wait a little bit.
+    setTimeout(() => {
+        transition.freeze = false;
+    }, 500);
+}
+
 function init() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     document.addEventListener('keyup', (event) => {
         if (round == 6) return;
+        if (transition.active) return;
 
         if (event.code == 'Backspace') {
             pos = Math.max(0, pos - 1);
@@ -150,6 +206,7 @@ function init() {
                 getFeedback();
                 round++;
                 pos = 0;
+                transition.active = true;
             }
         } if (event.code.startsWith('Key') && event.code.length == 4) {
             if (pos == 5) return;
@@ -163,6 +220,18 @@ function init() {
 function update() {
     requestAnimationFrame(update);
 
+    console.log(transition.freeze);
+    
+    // If in transition animate, waits.
+    if (transition.freeze) return;
+    
+    // console.log(transition.index, transition.index + 1 == grid[0].length);
+
+    // Update transition parameters.
+    if (transition.index == grid[0].length) {
+        resetTransition();
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.rect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#000'; 
@@ -171,6 +240,8 @@ function update() {
     drawWordsBox();
     drawWords();
     drawAuxLines();
+
+    if (transition.active && transition.type == 1) transition1(); 
 }
 
 init();
