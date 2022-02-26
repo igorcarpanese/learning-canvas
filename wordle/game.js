@@ -31,25 +31,28 @@ const boxSize = {
 };
 const transition = {
     active: false,
-    type: 1,
+    type: 2,
     shrinking: true,
+    scaleY: 1,
     freeze: false,
     index: 0
 }
 
 function resetTransition() {
     transition.active = false;
-    transition.type = 1;
+    transition.type = 2;
     transition.shrinking = true;
-    transition.index = 0;
+    transition.scaleY = 1;
+    transition.index = 0
 }
 
 function drawWords() {
     let x0 = canvas.width / 2 - (grid[0].length / 2 * boxSize.w) - boxSize.w / 2;
     let y0 = canvas.height / 2 - (grid.length / 2 * boxSize.h);
-
+    
     for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
+            if (transition.type == 2 && transition.active && i == round - 1 && j == transition.index) continue;
             ctx.fillStyle = '#fff';
             ctx.textAlign = "center";
             ctx.textBaseline = "middle"; 
@@ -97,7 +100,54 @@ function drawWordsBox() {
                         ctx.strokeRect(x, y, boxSize.w, boxSize.h);
                     }
                 } else if (transition.type == 2) {
-                    
+                    console.log(x0, y0);
+
+                    if (j < transition.index) {
+                        ctx.beginPath();
+                        ctx.fillStyle = feedback[i][j];
+                        ctx.rect(x, y, boxSize.w, boxSize.h);
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#fff';
+                        ctx.strokeRect(x, y, boxSize.w, boxSize.h);
+                    } else if (j == transition.index) {
+                        ctx.save();
+                        ctx.translate(x, y + boxSize.h / 2);
+                        ctx.scale(1.0, transition.scaleY);
+                        
+                        ctx.beginPath();
+                        ctx.fillStyle = transition.shrinking ? '#000' : feedback[i][j];
+                        ctx.rect(0, 0 - boxSize.h / 2, boxSize.w, boxSize.h);
+                        ctx.fill();
+                        
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#fff';
+                        ctx.strokeRect(0, 0 - boxSize.h / 2, boxSize.w, boxSize.h);
+                        
+                        ctx.fillStyle = '#fff';
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle"; 
+                        ctx.font = '36px Georgia';
+            
+                        ctx.fillText(grid[i][j], boxSize.w / 2, 4);
+
+                        ctx.restore();
+                        
+                        if (transition.shrinking) transition.scaleY -= 0.09;
+                        else transition.scaleY += 0.09;
+
+                        if (transition.scaleY <= 0.0) {
+                            transition.shrinking = false;
+                        } if (transition.scaleY >= 1.0) {
+                            transition.shrinking = true;
+                            transition.index++;
+                        }
+                    } else {
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#fff';
+                        ctx.strokeRect(x, y, boxSize.w, boxSize.h);
+                    }
                 }
             } else {
                 ctx.beginPath();
@@ -206,7 +256,8 @@ function init() {
                 getFeedback();
                 round++;
                 pos = 0;
-                transition.active = true;
+
+                if (transition.type != 0) transition.active = true;
             }
         } if (event.code.startsWith('Key') && event.code.length == 4) {
             if (pos == 5) return;
@@ -219,8 +270,6 @@ function init() {
 
 function update() {
     requestAnimationFrame(update);
-
-    console.log(transition.freeze);
     
     // If in transition animate, waits.
     if (transition.freeze) return;
@@ -240,6 +289,13 @@ function update() {
     drawWordsBox();
     drawWords();
     drawAuxLines();
+
+    // ctx.strokeStyle = "#fff";
+    // ctx.save()
+    // ctx.translate(150,350);
+    // ctx.scale(1,0.75);
+    // drawSpirograph(ctx,50,50,22,6,5);
+    // ctx.restore();
 
     if (transition.active && transition.type == 1) transition1(); 
 }
